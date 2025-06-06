@@ -1,0 +1,6 @@
+/target
+db.duckdb
+db.duckdb.wal
+.idea/
+items/
+prices/
