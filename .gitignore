@@ -4,4 +4,4 @@ db.duckdb.wal
 .idea/
 items/
 prices/
-parquet/
+parquet/*.parquet
