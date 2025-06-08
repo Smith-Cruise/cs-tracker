@@ -13,12 +13,13 @@ pub struct GoodListRequestData {
     page_size: i64,
 }
 
-
 pub async fn get_good_list(secret_key: &String) -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
-
+    let mut total_numbers: Option<u64> = Option::None;
+    let mut current_total_numbers: u64 = 0;
+    let mut is_finished = false;
     let mut page_index = 1;
-    loop {
+    while !is_finished {
         sleep(Duration::from_millis(1500)).await;
         let request_data = GoodListRequestData {
             page_index: page_index,
@@ -32,22 +33,38 @@ pub async fn get_good_list(secret_key: &String) -> Result<(), Box<dyn std::error
                 continue;
             }
         };
-        
-        let v: Value = match serde_json::from_str(&content) { 
+
+        // println!("{}", content);
+        let v: Value = match serde_json::from_str(&content) {
             Ok(res) => res,
             Err(e) => {
                 println!("page index: {} failed: {}, retry", page_index, e);
                 continue;
             }
         };
-        
-        let items = v["data"]["data"].as_object().expect("failed to get json");
-        if items.len() == 0 {
-            break;
-        }
 
+        match total_numbers {
+            Some(n) => {
+                current_total_numbers += v["data"]["data"]
+                    .as_object()
+                    .expect("failed to get data")
+                    .len() as u64;
+                if current_total_numbers >= n {
+                    is_finished = true;
+                }
+            }
+            None => {
+                total_numbers = Some(v["data"]["total"].as_u64().expect("failed to get total"));
+                current_total_numbers += v["data"]["data"]
+                    .as_object()
+                    .expect("failed to get data")
+                    .len() as u64;
+            }
+        }
+        
         fs::write(format!("items/page-{}.json", page_index), content)?;
         page_index += 1;
+        println!("total numbers: {:?}, current total number: {}", total_numbers, current_total_numbers);
     }
     Ok(())
 }

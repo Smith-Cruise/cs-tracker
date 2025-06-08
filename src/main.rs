@@ -2,10 +2,22 @@ mod good_details;
 mod good_list;
 mod writer;
 
-use std::env;
+use std::{env, fs};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    if !fs::exists("items")? {
+        fs::create_dir("items")?;
+    }
+    
+    if !fs::exists("prices")? {
+        fs::create_dir("prices")?;
+    }
+    
+    if !fs::exists("parquet")? { 
+        fs::create_dir("parquet")?;
+    }
+
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         eprintln!("Usage: xx credential");
