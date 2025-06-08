@@ -9,14 +9,14 @@ const API_ENDPOINT: &str = "https://api.csqaq.com/api/v1/goods/getPriceByMarketH
 
 #[derive(Serialize)]
 struct BatchPricesRequestData<'a> {
-    marketHashNameList: &'a [String],
+    #[serde(rename = "marketHashNameList")]
+    market_hash_name_list: &'a [String],
 }
 
 
 pub async fn get_good_details(secret_key: &String, hash_names: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let mut start_offset = 0;
     let total_num = hash_names.len();
-    
     loop {
         sleep(Duration::from_millis(1500)).await;
         if start_offset == total_num { 
@@ -49,7 +49,7 @@ async fn get_batch_prices(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let request_data = BatchPricesRequestData {
-        marketHashNameList: hash_name,
+        market_hash_name_list: hash_name,
     };
     let body = json!(request_data).to_string();
     let content = client
@@ -60,7 +60,7 @@ async fn get_batch_prices(
         .await?
         .text()
         .await?;
-    let v: Value = serde_json::from_str(&content)?;
+    let _: Value = serde_json::from_str(&content)?;
     fs::write(format!("prices/{}.json", filename), content)?;
     Ok(())
 }

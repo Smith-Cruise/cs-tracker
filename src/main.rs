@@ -2,10 +2,6 @@ mod good_details;
 mod good_list;
 mod writer;
 
-use arrow::array::ArrayBuilder;
-use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::env;
 
 #[tokio::main]

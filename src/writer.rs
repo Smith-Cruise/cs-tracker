@@ -10,20 +10,29 @@ use serde_json::Value;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Item {
-    goodId: i64,
+    #[serde(rename = "goodId")]
+    good_id: i64,
+    #[serde(rename = "name")]
     name: String,
-    marketHashName: String,
-    buffSellPrice: f64,
-    buffSellNum: i64,
-    yyypSellPrice: f64,
-    yyypSellNum: i64,
-    steamSellPrice: f64,
-    steamSellNum: i64,
+    #[serde(rename = "marketHashName")]
+    market_hash_name: String,
+    #[serde(rename = "buffSellPrice")]
+    buff_sell_price: f64,
+    #[serde(rename = "buffSellNum")]
+    buff_sell_num: i64,
+    #[serde(rename = "yyypSellPrice")]
+    yyyp_sell_price: f64,
+    #[serde(rename = "yyypSellNum")]
+    yyyp_sell_num: i64,
+    #[serde(rename = "steamSellPrice")]
+    steam_sell_price: f64,
+    #[serde(rename = "steamSellNum")]
+    steam_sell_num: i64,
 }
 
 pub async fn write_parquet() -> Result<(), Box<dyn std::error::Error>> {
     let now = Utc::now().timestamp();
-    // 写入 Parquet 文件
+    // 写入 Parquet 文件 
     let file = std::fs::File::create(format!("parquet/{}.parquet", now))?;
     let props = WriterProperties::builder().build();
 
@@ -53,7 +62,7 @@ pub async fn write_parquet() -> Result<(), Box<dyn std::error::Error>> {
         let content = fs::read_to_string(&path)?;
         let v: Value = match serde_json::from_str(&content) {
             Ok(v) => v,
-            Err(err) => {
+            Err(_) => {
                 println!("ignore file: {}", path.display());
                 continue;
             }
@@ -71,17 +80,17 @@ pub async fn write_parquet() -> Result<(), Box<dyn std::error::Error>> {
         let mut timestamps = TimestampSecondBuilder::new();
 
         for pair in v["data"]["success"].as_object().iter() {
-            for (key, value) in pair.iter() {
+            for (_, value) in pair.iter() {
                 let item: Item = serde_json::from_value(value.clone())?;
-                good_ids.append_value(item.goodId);
+                good_ids.append_value(item.good_id);
                 names.append_value(item.name);
-                market_hash_names.append_value(item.marketHashName);
-                buff_sell_prices.append_value(item.buffSellPrice);
-                buff_sell_nums.append_value(item.buffSellNum);
-                yyyp_sell_prices.append_value(item.yyypSellPrice);
-                yyyp_sell_nums.append_value(item.yyypSellNum);
-                steam_sell_prices.append_value(item.steamSellPrice);
-                steam_sell_nums.append_value(item.steamSellNum);
+                market_hash_names.append_value(item.market_hash_name);
+                buff_sell_prices.append_value(item.buff_sell_price);
+                buff_sell_nums.append_value(item.buff_sell_num);
+                yyyp_sell_prices.append_value(item.yyyp_sell_price);
+                yyyp_sell_nums.append_value(item.yyyp_sell_num);
+                steam_sell_prices.append_value(item.steam_sell_price);
+                steam_sell_nums.append_value(item.steam_sell_num);
                 timestamps.append_value(now);
             }
         }

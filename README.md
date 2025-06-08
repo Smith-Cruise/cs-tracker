@@ -2,6 +2,9 @@ cs2
 
 ### SQL
 ```sql
+CREATE VIEW test AS
+SELECT * FROM read_parquet('parquet/*');
+
 PRAGMA set_max_column_width=0;
 PRAGMA set_max_rows=1000000;
 
@@ -133,7 +136,7 @@ SELECT
     latest_total,
     (prev_total - latest_total) AS total_num_decrease
 FROM pivoted
-WHERE latest_total IS NOT NULL AND prev_total IS NOT NULL
+WHERE latest_total IS NOT NULL AND prev_total IS NOT NULL AND yyypSellPrice > 500
 ORDER BY total_num_decrease DESC
     LIMIT 50;
 

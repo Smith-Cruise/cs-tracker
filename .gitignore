@@ -4,3 +4,4 @@ db.duckdb.wal
 .idea/
 items/
 prices/
+parquet/

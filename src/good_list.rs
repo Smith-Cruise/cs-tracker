@@ -1,5 +1,5 @@
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::{Value, json};
 use std::fs;
 use std::time::Duration;
@@ -12,7 +12,6 @@ pub struct GoodListRequestData {
     page_index: i64,
     page_size: i64,
 }
-
 
 
 pub async fn get_good_list(secret_key: &String) -> Result<(), Box<dyn std::error::Error>> {
