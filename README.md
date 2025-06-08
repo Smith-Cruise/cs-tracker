@@ -26,7 +26,7 @@ WITH recent_times AS (
     ),
     latest_prices AS (
 SELECT
-    goodId,
+    goodId,        
     name,
     updateTime,
     yyypSellPrice as sell_price,
@@ -68,6 +68,8 @@ latest_num AS (
     SELECT
         goodId,
         name,
+        buffSellPrice,
+        yyypSellPrice,
         updateTime,
         (buffSellNum + yyypSellNum + steamSellNum) as total_num,
         ROW_NUMBER() OVER (PARTITION BY goodId ORDER BY updateTime DESC) AS rn
@@ -78,19 +80,23 @@ pivoted AS (
     SELECT
         goodId,
         name,
+        MAX(CASE WHEN rn = 1 THEN buffSellPrice END) as buffSellPrice,
+        MAX(CASE WHEN rn = 1 THEN yyypSellPrice END) as yyypSellPrice,
         MAX(CASE WHEN rn = 1 THEN total_num END) AS latest_total,
-        MAX(CASE WHEN rn = 2 THEN total_num END) AS prev_total
+        MAX(CASE WHEN rn = 3 THEN total_num END) AS prev_total
     FROM latest_num
     GROUP BY goodId,name
 )
 SELECT
     goodId,
     name,
+    buffSellPrice,
+    yyypSellPrice,
     prev_total,
     latest_total,
     (latest_total - prev_total) AS total_num_increase
 FROM pivoted
-WHERE latest_total IS NOT NULL AND prev_total IS NOT NULL
+WHERE latest_total IS NOT NULL AND prev_total IS NOT NULL AND yyypSellPrice > 100
 ORDER BY total_num_increase DESC
 LIMIT 10;
 
@@ -123,7 +129,7 @@ SELECT
     MAX(CASE WHEN rn = 1 THEN buffSellPrice END) as buffSellPrice,
     MAX(CASE WHEN rn = 1 THEN yyypSellPrice END) as yyypSellPrice,
     MAX(CASE WHEN rn = 1 THEN total_num END) AS latest_total,
-    MAX(CASE WHEN rn = 2 THEN total_num END) AS prev_total
+    MAX(CASE WHEN rn = 3 THEN total_num END) AS prev_total
 FROM latest_num
 GROUP BY goodId,name
     )
@@ -140,5 +146,12 @@ WHERE latest_total IS NOT NULL AND prev_total IS NOT NULL AND yyypSellPrice > 50
 ORDER BY total_num_decrease DESC
     LIMIT 50;
 
+```
 
+## latest three time point
+```sql
+SELECT DISTINCT to_timestamp(updateTime)
+    FROM test
+    ORDER BY updateTime DESC
+    LIMIT 3;
 ```
